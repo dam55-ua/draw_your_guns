@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <raylib.h>
 
 class StateMachine;
 

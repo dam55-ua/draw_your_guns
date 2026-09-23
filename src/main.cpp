@@ -3,6 +3,10 @@
 #include <memory>
 #include <chrono>
 
+extern "C" {
+    #include <raylib.h>
+}
+
 int main()
 { 
     float delta_time = 0.0f;
