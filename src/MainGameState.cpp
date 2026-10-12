@@ -3,29 +3,6 @@
 #include <iostream>
 #include <vector>
 
-namespace
-{
-	constexpr int terrain_segment_count = 40;
-	constexpr int terrain_anchor_count = 12;
-	constexpr int minimum_height_percent = 28;
-	constexpr int maximum_height_percent = 52;
-	constexpr int boundary_variation_percent = 25;
-	constexpr int grass_height = 8;
-	constexpr int base_width_percent = 6;
-	constexpr int base_height_percent = 42;
-	constexpr int foundation_height_percent = 5;
-	constexpr int flag_pole_height = 18;
-	constexpr int flag_pole_width = 2;
-	constexpr int flag_width = 12;
-	constexpr int flag_height = 8;
-
-	struct TerrainAnchor
-	{
-		float x;
-		int heightPercent;
-	};
-}
-
 MainGameState::MainGameState()
 {
 }
