@@ -1,4 +1,5 @@
 #include "Explosion.hpp"
+#include <cmath>
 
 Explosion::Explosion()
     : position{0.0f, 0.0f},
@@ -61,4 +62,29 @@ bool Explosion::IsActive() const
 float Explosion::GetRadius() const
 {
     return radius;
+}
+
+int Explosion::CalculateDamage(
+    Vector2 targetPosition,
+    int maxDamage
+) const
+{
+    if (!active || maxDamage <= 0) {
+        return 0;
+    }
+
+    float dx = targetPosition.x - position.x;
+    float dy = targetPosition.y - position.y;
+
+    float distance = std::sqrt(dx * dx + dy * dy);
+
+    if (distance >= radius) {
+        return 0;
+    }
+
+    float damageFactor = 1.0f - distance / radius;
+
+    return static_cast<int>(
+        std::round(maxDamage * damageFactor)
+    );
 }

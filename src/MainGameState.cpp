@@ -42,38 +42,52 @@ void MainGameState::update(float deltaTime)
     projectile.Update(deltaTime);
 
     // Check collision with temporary floor
-    if (projectile.IsActive()) {
-        Vector2 position = projectile.GetPosition();
+if (projectile.IsActive()) {
+    Vector2 current = projectile.GetPosition();
+    Vector2 previous = projectile.GetPreviousPosition();
+    float radius = projectile.GetRadius();
 
-        if (position.y >= temporaryGroundY) {
-            Vector2 impactPosition = {
-                position.x,
-                temporaryGroundY
-            };
+    float previousBottom = previous.y + radius;
+    float currentBottom = current.y + radius;
 
-            projectile.Deactivate();
-            explosion.Activate(impactPosition);
+    if (previousBottom < temporaryGroundY &&
+        currentBottom >= temporaryGroundY) {
 
-            // Apply damage once when the explosion starts
-            if (explosion.Contains(dummyTargetPosition)) {
-                dummyTargetHealth -= 30;
+        float denominator = currentBottom - previousBottom;
 
-                if (dummyTargetHealth < 0) {
-                    dummyTargetHealth = 0;
-                }
-            }
+        float t = (temporaryGroundY - previousBottom) / denominator;
+
+        float impactX = previous.x +
+                        (current.x - previous.x) * t;
+
+        Vector2 impactPosition = {
+            impactX,
+            temporaryGroundY
+        };
+
+        projectile.Deactivate();
+        explosion.Activate(impactPosition);
+
+        int damage = explosion.CalculateDamage(
+            dummyTargetPosition,
+            30
+        );
+
+        dummyTargetHealth -= damage;
+
+        if (dummyTargetHealth < 0) {
+            dummyTargetHealth = 0;
         }
 
-        // Deactivate if projectile leaves screen
-        else if (position.x < 0.0f ||
-                 position.x > GetScreenWidth() ||
-                 position.y > GetScreenHeight()) {
-            projectile.Deactivate();
-        }
     }
+    else if (current.x < -radius ||
+             current.x > GetScreenWidth() + radius ||
+             current.y > GetScreenHeight() + radius) {
+        projectile.Deactivate();
+    }
+}
 
-    // Update explosion lifetime
-    explosion.Update(deltaTime);
+explosion.Update(deltaTime);
 }
 
 void MainGameState::render()
@@ -89,6 +103,7 @@ void MainGameState::render()
         static_cast<int>(temporaryGroundY),
         DARKGREEN
     );
+
 
     // Dummy target
     DrawCircleV(dummyTargetPosition, 12.0f, BLUE);

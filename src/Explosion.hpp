@@ -18,6 +18,11 @@ public:
     void Render() const;
 
     bool Contains(Vector2 point) const;
+
+    //Calculate damage based on distance from explosion
+    int CalculateDamage(Vector2 targetPosition, int maxDamage) const;
+
     bool IsActive() const;
     float GetRadius() const;
 };
+

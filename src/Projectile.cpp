@@ -5,6 +5,7 @@
 Projectile::Projectile()
     : position{0.0f, 0.0f},
       velocity{0.0f, 0.0f},
+      previousPosition{0.0f, 0.0f},
       radius(8.0f),
       gravity(500.0f),
       active(false)
@@ -14,6 +15,8 @@ Projectile::Projectile()
 void Projectile::Launch(Vector2 origin, float angle, float power)
 {
     position = origin;
+
+    previousPosition = origin;
 
     float angleRadians = angle * DEG2RAD;
 
@@ -30,7 +33,7 @@ void Projectile::Update(float deltaTime)
     }
 
     velocity.y += gravity * deltaTime;
-
+    previousPosition = position;
     position.x += velocity.x * deltaTime;
     position.y += velocity.y * deltaTime;
 }
@@ -57,4 +60,14 @@ Vector2 Projectile::GetPosition() const
 void Projectile::Deactivate()
 {
     active = false;
+}
+
+float Projectile::GetRadius() const
+{
+    return radius;
+}
+
+Vector2 Projectile::GetPreviousPosition() const
+{
+    return previousPosition;
 }
