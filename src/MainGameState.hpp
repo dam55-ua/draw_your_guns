@@ -1,10 +1,12 @@
 #pragma once
 #include <GameState.hpp>
+#include <Projectile.hpp>
 
 class MainGameState : public GameState
 {
     public:
         MainGameState();
+        Projectile projectile;
         ~MainGameState() = default;
 
         void init() override;
