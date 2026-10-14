@@ -4,7 +4,7 @@
 #include "segment.hpp"
 #include "spawn_base.hpp"
 
-// Agrupamos la configuración para mantener limpia la clase
+// Configuración del Mapa predeterminada
 struct MapConfig
 {
     int terrainSegmentCount = 40;
@@ -28,9 +28,9 @@ private:
     std::vector<Segment> segments;
     std::vector<SpawnBase> spawnBases;
 
-    // Gestión del Evento Dinámico: Subida del Nivel del Mar
+   /*// Gestión del Evento Dinámico: Subida del Nivel del Mar
     float waterLevel;
-    float waterRiseSpeed;
+    float waterRiseSpeed;*/
 
 public:
     Map(int screenWidth, int screenHeight, MapConfig config = MapConfig());
@@ -39,7 +39,7 @@ public:
     void generateTerrain(const std::vector<SpawnBase>& bases);
     void generateSegments();
 
-    // Actualización y Eventos (P. ej. Subida de agua en rondas avanzadas)
+    // Actualización y Eventos 
     void update(int currentRound);
     void draw() const;
 
