@@ -53,3 +53,8 @@ Vector2 Projectile::GetPosition() const
 {
     return position;
 }
+
+void Projectile::Deactivate()
+{
+    active = false;
+}

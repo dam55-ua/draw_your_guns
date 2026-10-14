@@ -17,6 +17,7 @@ public:
     void Launch(Vector2 origin, float angle, float power);
     void Update(float deltaTime);
     void Render() const;
+    void Deactivate();
 
     bool IsActive() const;
     Vector2 GetPosition() const;
