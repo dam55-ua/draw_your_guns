@@ -4,14 +4,14 @@
 class SpawnBase
 {
 private:
-    Rectangle platform;
+    Rectangle base;
 
 public:
     SpawnBase();
-    SpawnBase(Rectangle platform);
+    SpawnBase(Rectangle base);
 
-    void setPlatform(Rectangle newPlatform);
-    Rectangle getPlatform() const;
-    Vector2 getSpawnPosition() const;
+    void setBase(Rectangle newBase);
+    Rectangle getBase() const;
+    Vector2 getSpawnCoords() const;
     void draw() const;
 };
