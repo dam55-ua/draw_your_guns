@@ -18,12 +18,12 @@ Rectangle SpawnBase:getBase() const {
 
 Vector2 SpawnBase:getSpawnCoords() const {
     return {
-        platform.x + platform.width / 2.0f,
-        platform.y
+        base.x + base.width / 2.0f,
+        base.y
     };
 }
 
 void SpawnBase::draw() const
 {
-    DrawRectangleRec(platform, GRAY);
+    DrawRectangleRec(base, GRAY);
 }
