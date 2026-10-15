@@ -1,21 +1,21 @@
 #pragma once
 #include <raylib.h>
 #include <vector>
-#include "segment.hpp"
-#include "spawn_base.hpp"
+#include "Segment.hpp"
+#include "SpawnBase.hpp"
 
 // Configuración del Mapa predeterminada
 struct MapConfig
 {
-    int terrainSegmentCount = 40;
-    int terrainAnchorCount = 12;
+    int terrainSegmentCount = 48;
+    int terrainAnchorCount = 14;
     int minHeightPercent = 28;
     int maxHeightPercent = 52;
     int boundaryVariationPercent = 25;
     int grassHeight = 8;
     int baseWidthPercent = 6;
-    int baseHeightPercent = 42;
-    int foundationHeightPercent = 5;
+    int baseHeightPercent = 30;
+    int bedrockHeightPercent = 1;
 };
 
 class Map
@@ -35,6 +35,8 @@ private:
 public:
     Map(int screenWidth, int screenHeight, MapConfig config = MapConfig());
 
+    void generateSpawnBases();
+
     // Generación
     void generateTerrain(const std::vector<SpawnBase>& bases);
     void generateSegments();
@@ -50,5 +52,5 @@ public:
     // Getters por referencia constante (Optimización de memoria)
     const std::vector<Segment>& getSegments() const;
     const std::vector<SpawnBase>& getSpawnBases() const;
-    float getWaterLevel() const;
+    //float getWaterLevel() const;
 };
