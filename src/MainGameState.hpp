@@ -5,6 +5,8 @@
 #include <Explosion.hpp>
 #include <vector>
 #include <optional>
+#include <array>
+#include "map/Map.hpp"
 
 class MainGameState : public GameState
 {
@@ -34,4 +36,8 @@ class MainGameState : public GameState
         Explosion explosion;
         int currentPlayerIndex;
         std::optional<ShotData> pendingShot;
+        // Cada tramo ocupa todo el espacio desde su superficie hasta el fondo de la ventana.
+        Map map;  
+
+        char entered_key;
 };

@@ -1,11 +1,10 @@
 #include <MainGameState.hpp>
 #include <raylib.h>
 
-MainGameState::MainGameState()
-    : players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt)
+MainGameState::MainGameState(): players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt), 
+								map(GetScreenWidth(), GetScreenHeight())
 {
 }
-
 float MainGameState::GetGroundY() const
 {
     return static_cast<float>(GetScreenHeight()) - GameConfig::GROUND_HEIGHT;
@@ -14,6 +13,8 @@ float MainGameState::GetGroundY() const
 void MainGameState::init()
 {
     const float groundY = GetGroundY();
+
+	map.generateTerrain();
 
     players.clear();
     players.emplace_back(Player::Team::Left,
@@ -53,6 +54,7 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
     }
 
     if (minX > maxX) minX = maxX;
+	
 }
 
 void MainGameState::handleInput()
@@ -221,8 +223,7 @@ void MainGameState::render()
     BeginDrawing();
 
         ClearBackground(SKYBLUE);
-
-        RenderGround();
+   		map.draw();
 
         for (const Player& player : players)
         {
@@ -242,4 +243,5 @@ void MainGameState::render()
         RenderHud();
 
     EndDrawing();
+	
 }
