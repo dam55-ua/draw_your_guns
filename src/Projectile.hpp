@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "GameTypes.hpp"
 
 class Projectile {
 private:
@@ -15,6 +16,9 @@ private:
 public:
     Projectile();
 
+    // Contrato con el turno del jugador: usa exactamente la fisica de GameTypes
+    // (StepShot) para que la trayectoria previsualizada y la bala real coincidan.
+    void Launch(const ShotData& shot);
     void Launch(Vector2 origin, float angle, float power);
     void Update(float deltaTime);
     void Render() const;

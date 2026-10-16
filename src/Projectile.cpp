@@ -7,9 +7,18 @@ Projectile::Projectile()
       velocity{0.0f, 0.0f},
       previousPosition{0.0f, 0.0f},
       radius(8.0f),
-      gravity(500.0f),
+      gravity(GameConfig::GRAVITY),
       active(false)
 {
+}
+
+void Projectile::Launch(const ShotData& shot)
+{
+    position = shot.origin;
+    previousPosition = shot.origin;
+    velocity = shot.velocity;
+    gravity = shot.gravity;
+    active = true;
 }
 
 void Projectile::Launch(Vector2 origin, float angle, float power)

@@ -8,8 +8,8 @@ extern "C" {
 
 int main()
 {
-    // Initialize window
-    InitWindow(1000, 600, "Draw your guns!");
+    SetConfigFlags(FLAG_FULLSCREEN_MODE);
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Draw your guns!");
     SetTargetFPS(60);
 
     float delta_time = 0.0f;
@@ -30,6 +30,5 @@ int main()
     }
 
     CloseWindow();
-
     return 0;
 }
