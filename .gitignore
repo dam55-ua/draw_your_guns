@@ -37,6 +37,8 @@
 *.out
 *.app
 /game
+/draw_your_guns
+/game.log
 
 # debug information files
 *.dwo

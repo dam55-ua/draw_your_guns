@@ -28,6 +28,9 @@ namespace GameConfig
     const float TRAJECTORY_STEP = 0.04f;
     const int   TRAJECTORY_POINTS = 40;
     const int   TRAJECTORY_DOT_RADIUS = 3;
+
+    // Combate
+    const float EXPLOSION_MAX_DAMAGE = 30.0f;
 }
 
 // Informacion completa de un disparo: es el contrato entre el turno actual

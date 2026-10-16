@@ -134,6 +134,12 @@ Rectangle Player::GetBounds() const
              GameConfig::PLAYER_HEIGHT };
 }
 
+void Player::ApplyDamage(float amount)
+{
+    hp -= amount;
+    if (hp < 0.0f) hp = 0.0f;
+}
+
 void Player::Render() const
 {
     const Rectangle bounds = GetBounds();

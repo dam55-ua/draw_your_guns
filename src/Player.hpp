@@ -22,6 +22,8 @@ class Player
         Team GetTeam() const { return team; }
         Vector2 GetPosition() const { return position; }
         Rectangle GetBounds() const;
+        float GetHp() const { return hp; }
+        void ApplyDamage(float amount);
         float GetRemainingMove() const { return turnMoveBudget; }
         float GetAimAngle() const { return aimAngleDeg; }
         float GetAimPower() const { return aimPower; }

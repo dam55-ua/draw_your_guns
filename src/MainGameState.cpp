@@ -2,7 +2,7 @@
 #include <raylib.h>
 
 MainGameState::MainGameState()
-    : players{}, currentPlayerIndex(0), pendingShot(std::nullopt)
+    : players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt)
 {
 }
 
@@ -20,6 +20,9 @@ void MainGameState::init()
         Vector2{ static_cast<float>(GetScreenWidth()) * 0.15f, groundY });
     players.emplace_back(Player::Team::Right,
         Vector2{ static_cast<float>(GetScreenWidth()) * 0.85f, groundY });
+
+    projectile = Projectile();
+    explosion = Explosion();
 
     currentPlayerIndex = 0;
     pendingShot = std::nullopt;
@@ -54,6 +57,8 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
 
 void MainGameState::handleInput()
 {
+    if (projectile.IsActive()) return;
+
     Player& current = players[currentPlayerIndex];
 
     if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) current.Jump();
@@ -61,7 +66,7 @@ void MainGameState::handleInput()
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && current.IsAiming())
     {
         pendingShot = current.BuildShot();
-        NextTurn();
+        projectile.Launch(*pendingShot);
     }
     else if (IsKeyPressed(KEY_ENTER))
     {
@@ -73,25 +78,96 @@ void MainGameState::update(float deltaTime)
 {
     Player& current = players[currentPlayerIndex];
 
-    float direction = 0.0f;
-    if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  direction -= 1.0f;
-    if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) direction += 1.0f;
-
-    if (direction != 0.0f)
+    if (!projectile.IsActive())
     {
-        float minX = 0.0f;
-        float maxX = 0.0f;
-        ClampPlayerBounds(current, minX, maxX);
-        current.Move(direction, deltaTime, minX, maxX);
-    }
+        float direction = 0.0f;
+        if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  direction -= 1.0f;
+        if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) direction += 1.0f;
 
-    current.UpdateAim(GetMousePosition());
-    current.Update(deltaTime, GetGroundY());
+        if (direction != 0.0f)
+        {
+            float minX = 0.0f;
+            float maxX = 0.0f;
+            ClampPlayerBounds(current, minX, maxX);
+            current.Move(direction, deltaTime, minX, maxX);
+        }
+
+        current.UpdateAim(GetMousePosition());
+    }
 
     for (Player& player : players)
     {
-        if (&player != &current) player.Update(deltaTime, GetGroundY());
+        player.Update(deltaTime, GetGroundY());
     }
+
+    projectile.Update(deltaTime);
+
+    if (projectile.IsActive())
+    {
+        Vector2 positionNow = projectile.GetPosition();
+        Vector2 previous = projectile.GetPreviousPosition();
+        const float radius = projectile.GetRadius();
+        const float groundY = GetGroundY();
+
+        // Interpolacion del punto de impacto contra el suelo (portada de feat/proyectile)
+        const float previousBottom = previous.y + radius;
+        const float currentBottom = positionNow.y + radius;
+
+        if (previousBottom < groundY && currentBottom >= groundY)
+        {
+            const float t = (groundY - previousBottom) / (currentBottom - previousBottom);
+            const float impactX = previous.x + (positionNow.x - previous.x) * t;
+            ResolveImpact({ impactX, groundY });
+        }
+        else if (CheckPlayerImpact(positionNow))
+        {
+            ResolveImpact(positionNow);
+        }
+        else if (positionNow.x < -radius ||
+                 positionNow.x > GetScreenWidth() + radius ||
+                 positionNow.y > GetScreenHeight() + radius)
+        {
+            projectile.Deactivate();
+            NextTurn();
+        }
+    }
+
+    explosion.Update(deltaTime);
+}
+
+bool MainGameState::CheckPlayerImpact(Vector2 impactPosition) const
+{
+    const float radius = projectile.GetRadius();
+
+    for (int i = 0; i < static_cast<int>(players.size()); ++i)
+    {
+        // El proyectil no impacta contra el jugador que lo ha disparado.
+        if (i == currentPlayerIndex) continue;
+
+        if (CheckCollisionCircleRec(impactPosition, radius, players[i].GetBounds()))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void MainGameState::ResolveImpact(Vector2 impactPosition)
+{
+    projectile.Deactivate();
+    explosion.Activate(impactPosition);
+
+    for (Player& player : players)
+    {
+        const Rectangle bounds = player.GetBounds();
+        const Vector2 center = { bounds.x + bounds.width * 0.5f,
+                                 bounds.y + bounds.height * 0.5f };
+        const int damage = explosion.CalculateDamage(center, GameConfig::EXPLOSION_MAX_DAMAGE);
+        if (damage > 0) player.ApplyDamage(static_cast<float>(damage));
+    }
+
+    NextTurn();
 }
 
 void MainGameState::NextTurn()
@@ -119,15 +195,22 @@ void MainGameState::RenderHud() const
     DrawText(TextFormat("Turno: equipo %s", teamName), 20, 20, 24, DARKGRAY);
     DrawText(TextFormat("Movimiento restante: %.0f px", current.GetRemainingMove()), 20, 50, 18, GRAY);
 
+    for (int i = 0; i < static_cast<int>(players.size()); ++i)
+    {
+        const char* name = (players[i].GetTeam() == Player::Team::Left) ? "IZQ" : "DER";
+        const Color color = (players[i].GetTeam() == Player::Team::Left) ? BLUE : RED;
+        DrawText(TextFormat("%s: %.0f HP", name, players[i].GetHp()), 20, 76 + i * 24, 18, color);
+    }
+
     if (pendingShot.has_value())
     {
         const ShotData& shot = *pendingShot;
-        DrawText(TextFormat("Cola disparo [feat/proyectile]: origen (%.0f, %.0f), angulo %.0f, potencia %.0f",
+        DrawText(TextFormat("Ultimo disparo [feat/proyectile]: origen (%.0f, %.0f), angulo %.0f, potencia %.0f",
                             shot.origin.x, shot.origin.y, shot.angleDeg, shot.power),
-                 20, 76, 18, MAROON);
+                 20, 128, 18, MAROON);
     }
 
-    DrawText("Raton: apuntar | Click: guardar disparo y pasar turno | ENTER: pasar turno",
+    DrawText("Raton: apuntar | Click: disparar | ENTER: pasar turno",
              20, GetScreenHeight() - 56, 18, GRAY);
     DrawText("A/D o Flechas: mover | W: saltar | ESC: salir",
              20, GetScreenHeight() - 30, 18, DARKGRAY);
@@ -146,9 +229,15 @@ void MainGameState::render()
             player.Render();
         }
 
-        const Player& current = players[currentPlayerIndex];
-        current.RenderAim();
-        current.RenderTrajectory(GetGroundY());
+        if (!projectile.IsActive())
+        {
+            const Player& current = players[currentPlayerIndex];
+            current.RenderAim();
+            current.RenderTrajectory(GetGroundY());
+        }
+
+        projectile.Render();
+        explosion.Render();
 
         RenderHud();
 
