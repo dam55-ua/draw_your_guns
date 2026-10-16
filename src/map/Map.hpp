@@ -3,30 +3,37 @@
 #include <vector>
 #include "Segment.hpp"
 #include "SpawnBase.hpp"
+#include "TerrainProfile.hpp"
 
 // Configuración del Mapa predeterminada
 struct MapConfig
 {
-    int terrainSegmentCount = 48;
-    int terrainAnchorCount = 14;
-    int minHeightPercent = 28;
-    int maxHeightPercent = 52;
-    int boundaryVariationPercent = 25;
+    int terrainSegmentCount = 80;
+    int terrainAnchorCount = 20;
+    int minHeightPercent = 25;
+    int maxHeightPercent = 80;
+    int columnEdgeVariationPercent = 25;
     int grassHeight = 8;
     int baseWidthPercent = 6;
-    int baseHeightPercent = 30;
+    int baseHeightPercent = 40;
     int bedrockHeightPercent = 1;
 };
 
 class Map
 {
 private:
+
     int screenWidth;
     int screenHeight;
     MapConfig config;
 
     std::vector<Segment> segments;
     std::vector<SpawnBase> spawnBases;
+
+    std::vector<int> buildColumnEdges() const;
+    TerrainProfile buildTerrainProfile() const;
+    Segment makeSegment(int leftX, int rightX, const TerrainProfile& profile) const;
+    bool isInsideSpawnBase(float x) const;
 
    /*// Gestión del Evento Dinámico: Subida del Nivel del Mar
     float waterLevel;
@@ -38,7 +45,7 @@ public:
     void generateSpawnBases();
 
     // Generación
-    void generateTerrain(const std::vector<SpawnBase>& bases);
+    void generateTerrain();
     void generateSegments();
 
     // Actualización y Eventos 

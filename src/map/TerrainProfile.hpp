@@ -11,6 +11,7 @@ struct TerrainAnchor //Punto por el que el terreno debe pasar
 
 class TerrainProfile
 {
+public:
     void clear();
 
     void addAnchor(float x, int heightPercent);

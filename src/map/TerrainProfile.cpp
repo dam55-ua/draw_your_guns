@@ -41,7 +41,6 @@ int TerrainProfile::samplePercent(float x) const
     // x está a la derecha de la última ancla.
     if (rightIndex == anchors.size()){return anchors.back().heightPercent;}
 
-    // Con el índice ya es trivial sacar las dos anclas vecinas.
     const TerrainAnchor& left  = anchors[rightIndex - 1];
     const TerrainAnchor& right = anchors[rightIndex];
 
