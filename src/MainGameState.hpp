@@ -28,7 +28,7 @@ class MainGameState : public GameState
         void ResolveImpact(Vector2 impactPosition);
         bool CheckPlayerImpact(Vector2 impactPosition) const;
         void ClampPlayerBounds(Player& player, float& minX, float& maxX) const;
-        void RenderGround() const;
+        bool HasWallAhead(const Player& player, float direction, float deltaTime) const;
         void RenderHud() const;
 
         std::vector<Player> players;

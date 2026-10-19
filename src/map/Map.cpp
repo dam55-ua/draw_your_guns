@@ -150,6 +150,19 @@ void Map::draw() const
     }
 }
 
+int Map::getGroundYAt(float x) const
+{
+    for (const Segment& segment : segments)
+    {
+        const Rectangle bounds = segment.getBounds();
+        if (x >= bounds.x && x <= bounds.x + bounds.width)
+        {
+            return bounds.y; // Retorna la coordenada Y del suelo en esa posición X
+        }
+    }
+    return screenHeight; // Si no hay segmento, retorna el fondo de la pantalla
+}
+
 //Colisión
 bool Map::checkCollision(Rectangle entity) const
 {

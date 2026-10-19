@@ -12,15 +12,16 @@ float MainGameState::GetGroundY() const
 
 void MainGameState::init()
 {
-    const float groundY = GetGroundY();
 
-	map.generateTerrain();
+    // Generamos el mapa
+    map.generateTerrain();
+
+    // Spawnean los jugadores
+    const std::vector<SpawnBase>& bases = map.getSpawnBases();
 
     players.clear();
-    players.emplace_back(Player::Team::Left,
-        Vector2{ static_cast<float>(GetScreenWidth()) * 0.15f, groundY });
-    players.emplace_back(Player::Team::Right,
-        Vector2{ static_cast<float>(GetScreenWidth()) * 0.85f, groundY });
+    players.emplace_back(Player::Team::Left,  bases[0].getSpawnCoords());
+    players.emplace_back(Player::Team::Right, bases[1].getSpawnCoords());
 
     projectile = Projectile();
     explosion = Explosion();
@@ -91,7 +92,11 @@ void MainGameState::update(float deltaTime)
             float minX = 0.0f;
             float maxX = 0.0f;
             ClampPlayerBounds(current, minX, maxX);
-            current.Move(direction, deltaTime, minX, maxX);
+
+            if (!current.HasWallAhead(direction, deltaTime, map))
+            {
+                current.Move(direction, deltaTime, minX, maxX);
+            }
         }
 
         current.UpdateAim(GetMousePosition());
@@ -99,7 +104,7 @@ void MainGameState::update(float deltaTime)
 
     for (Player& player : players)
     {
-        player.Update(deltaTime, GetGroundY());
+        player.Update(deltaTime, map.getGroundYAt(player.GetPosition().x));
     }
 
     projectile.Update(deltaTime);
@@ -176,17 +181,6 @@ void MainGameState::NextTurn()
 {
     currentPlayerIndex = (currentPlayerIndex + 1) % static_cast<int>(players.size());
     players[currentPlayerIndex].ResetTurn();
-}
-
-void MainGameState::RenderGround() const
-{
-    const float groundY = GetGroundY();
-    const float grassHeight = GameConfig::GRASS_HEIGHT;
-
-    DrawRectangle(0, static_cast<int>(groundY), GetScreenWidth(),
-                  static_cast<int>(GameConfig::GROUND_HEIGHT), BROWN);
-    DrawRectangle(0, static_cast<int>(groundY), GetScreenWidth(),
-                  static_cast<int>(grassHeight), GREEN);
 }
 
 void MainGameState::RenderHud() const

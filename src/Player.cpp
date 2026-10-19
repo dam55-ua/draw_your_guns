@@ -1,5 +1,7 @@
 #include <Player.hpp>
 #include <cmath>
+#include "map/Map.hpp" 
+
 
 namespace
 {
@@ -56,6 +58,19 @@ void Player::Jump()
 
 void Player::Update(float dt, float groundY)
 {
+
+    if (grounded)
+    {
+        if (groundY > position.y + 1.0f)
+        {
+            grounded = false;      // ya no hay suelo debajo
+        }
+        else
+        {
+            position.y = groundY;  // está andando sobre superficie
+        }
+    }
+
     if (grounded) return;
 
     velocityY += GameConfig::GRAVITY * dt;
@@ -120,6 +135,23 @@ ShotData Player::BuildShot() const
     shot.power = aimPower;
     return shot;
 }
+
+bool Player::HasWallAhead(float direction, float deltaTime, const Map& map) const
+{
+    const Rectangle bounds = GetBounds();
+    const float feetY = bounds.y + bounds.height;               // los pies
+    const float limitY = feetY - GameConfig::MAX_STEP_HEIGHT;   // altura máxima que puedo subir sin saltar
+
+    // El sonda cubre justo el próximo paso, para no meternos dentro de la pared.
+    const float probeWidth = GameConfig::MOVE_SPEED * deltaTime + 2.0f;
+
+    // Banda fina de 1 px: si el terreno la cruza, es que es más alto que un escalón.
+    Rectangle band = { 0.0f, limitY, probeWidth, 1.0f };
+    band.x = (direction > 0.0f) ? bounds.x + bounds.width : bounds.x - probeWidth;
+
+    return map.checkCollision(band);
+}
+
 
 Vector2 Player::GetMuzzle() const
 {

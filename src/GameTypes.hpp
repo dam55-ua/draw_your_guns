@@ -14,14 +14,15 @@ namespace GameConfig
     const float MIN_SEPARATION_RATIO = 0.18f;
 
     // Jugador
-    const float PLAYER_WIDTH = 34.0f;
-    const float PLAYER_HEIGHT = 52.0f;
+    const float PLAYER_WIDTH = 22.0f;
+    const float PLAYER_HEIGHT = 32.0f;
     const float PLAYER_MAX_HP = 100.0f;
     const float SCREEN_MARGIN = 10.0f;
+    const float MAX_STEP_HEIGHT = 12.0f;
 
     // Escenario
     const float GROUND_HEIGHT = 48.0f;
-    const float GRASS_HEIGHT = 8.0f;
+    
 
     // Apuntado y trayectoria
     const float MAX_POWER = 700.0f;
