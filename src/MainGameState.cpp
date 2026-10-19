@@ -1,11 +1,10 @@
 #include <MainGameState.hpp>
 #include <raylib.h>
 
-MainGameState::MainGameState()
-    : players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt)
+MainGameState::MainGameState(): players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt), 
+								map(GetScreenWidth(), GetScreenHeight())
 {
 }
-
 float MainGameState::GetGroundY() const
 {
     return static_cast<float>(GetScreenHeight()) - GameConfig::GROUND_HEIGHT;
@@ -13,13 +12,16 @@ float MainGameState::GetGroundY() const
 
 void MainGameState::init()
 {
-    const float groundY = GetGroundY();
+
+    // Generamos el mapa
+    map.generateTerrain();
+
+    // Spawnean los jugadores
+    const std::vector<SpawnBase>& bases = map.getSpawnBases();
 
     players.clear();
-    players.emplace_back(Player::Team::Left,
-        Vector2{ static_cast<float>(GetScreenWidth()) * 0.15f, groundY });
-    players.emplace_back(Player::Team::Right,
-        Vector2{ static_cast<float>(GetScreenWidth()) * 0.85f, groundY });
+    players.emplace_back(Player::Team::Left,  bases[0].getSpawnCoords());
+    players.emplace_back(Player::Team::Right, bases[1].getSpawnCoords());
 
     projectile = Projectile();
     explosion = Explosion();
@@ -53,6 +55,7 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
     }
 
     if (minX > maxX) minX = maxX;
+	
 }
 
 void MainGameState::handleInput()
@@ -89,7 +92,11 @@ void MainGameState::update(float deltaTime)
             float minX = 0.0f;
             float maxX = 0.0f;
             ClampPlayerBounds(current, minX, maxX);
-            current.Move(direction, deltaTime, minX, maxX);
+
+            if (!current.HasWallAhead(direction, deltaTime, map))
+            {
+                current.Move(direction, deltaTime, minX, maxX);
+            }
         }
 
         current.UpdateAim(GetMousePosition());
@@ -97,7 +104,7 @@ void MainGameState::update(float deltaTime)
 
     for (Player& player : players)
     {
-        player.Update(deltaTime, GetGroundY());
+        player.Update(deltaTime, map.getGroundYAt(player.GetPosition().x));
     }
 
     projectile.Update(deltaTime);
@@ -176,17 +183,6 @@ void MainGameState::NextTurn()
     players[currentPlayerIndex].ResetTurn();
 }
 
-void MainGameState::RenderGround() const
-{
-    const float groundY = GetGroundY();
-    const float grassHeight = GameConfig::GRASS_HEIGHT;
-
-    DrawRectangle(0, static_cast<int>(groundY), GetScreenWidth(),
-                  static_cast<int>(GameConfig::GROUND_HEIGHT), BROWN);
-    DrawRectangle(0, static_cast<int>(groundY), GetScreenWidth(),
-                  static_cast<int>(grassHeight), GREEN);
-}
-
 void MainGameState::RenderHud() const
 {
     const Player& current = players[currentPlayerIndex];
@@ -221,8 +217,7 @@ void MainGameState::render()
     BeginDrawing();
 
         ClearBackground(SKYBLUE);
-
-        RenderGround();
+   		map.draw();
 
         for (const Player& player : players)
         {
@@ -242,4 +237,5 @@ void MainGameState::render()
         RenderHud();
 
     EndDrawing();
+	
 }

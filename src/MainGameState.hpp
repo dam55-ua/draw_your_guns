@@ -5,6 +5,8 @@
 #include <Explosion.hpp>
 #include <vector>
 #include <optional>
+#include <array>
+#include "map/Map.hpp"
 
 class MainGameState : public GameState
 {
@@ -26,7 +28,7 @@ class MainGameState : public GameState
         void ResolveImpact(Vector2 impactPosition);
         bool CheckPlayerImpact(Vector2 impactPosition) const;
         void ClampPlayerBounds(Player& player, float& minX, float& maxX) const;
-        void RenderGround() const;
+        bool HasWallAhead(const Player& player, float direction, float deltaTime) const;
         void RenderHud() const;
 
         std::vector<Player> players;
@@ -34,4 +36,8 @@ class MainGameState : public GameState
         Explosion explosion;
         int currentPlayerIndex;
         std::optional<ShotData> pendingShot;
+        // Cada tramo ocupa todo el espacio desde su superficie hasta el fondo de la ventana.
+        Map map;  
+
+        char entered_key;
 };

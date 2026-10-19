@@ -42,3 +42,5 @@
 
 # debug information files
 *.dwo
+game
+.vscode/settings.json

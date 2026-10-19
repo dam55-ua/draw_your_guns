@@ -7,9 +7,11 @@ extern "C" {
 }
 
 int main()
-{
-    SetConfigFlags(FLAG_FULLSCREEN_MODE);
-    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), "Draw your guns!");
+{ 
+    // El modo de pantalla completa se configura antes de crear la ventana.
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(1280, 720, "Draw your guns!");
+    ToggleFullscreen();          // o SetWindowState(FLAG_FULLSCREEN_MODE)
     SetTargetFPS(60);
 
     float delta_time = 0.0f;
@@ -21,8 +23,13 @@ int main()
     // Main game loop
     while (!WindowShouldClose() && !state_machine.is_game_ending())
     {
-        delta_time = GetFrameTime();
+        if (WindowShouldClose())
+        {
+            break;
+        }
 
+        // Se mide el tiempo entre frames para que la actualización no dependa de los FPS.
+        delta_time = GetFrameTime();
         state_machine.handle_state_changes(delta_time);
         state_machine.getCurrentState()->handleInput();
         state_machine.getCurrentState()->update(delta_time);

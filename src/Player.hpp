@@ -1,6 +1,9 @@
 #pragma once
 #include <GameTypes.hpp>
 
+class Map;
+
+
 class Player
 {
     public:
@@ -14,6 +17,8 @@ class Player
         void Update(float dt, float groundY);
         void UpdateAim(Vector2 mousePosition);
         ShotData BuildShot() const;
+
+        bool HasWallAhead(float direction, float deltaTime, const Map& map) const;
 
         void Render() const;
         void RenderAim() const;
