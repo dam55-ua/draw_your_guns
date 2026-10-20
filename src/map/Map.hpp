@@ -35,6 +35,7 @@ private:
     Segment makeSegment(int leftX, int rightX, const TerrainProfile& profile) const;
     bool isInsideSpawnBase(float x) const;
 
+
    /*// Gestión del Evento Dinámico: Subida del Nivel del Mar
     float waterLevel;
     float waterRiseSpeed;*/
@@ -56,6 +57,7 @@ public:
     bool checkCollision(Rectangle entity) const;
     int getGroundYAt(float x) const;
     void destroyTerrainAt(Vector2 impactPoint, float radius);
+    bool checkCollisionProjectile(Vector2 center, float radius) const;
 
     // Getters por referencia constante (Optimización de memoria)
     const std::vector<Segment>& getSegments() const;

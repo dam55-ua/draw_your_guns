@@ -120,11 +120,9 @@ void MainGameState::update(float deltaTime)
         const float previousBottom = previous.y + radius;
         const float currentBottom = positionNow.y + radius;
 
-        if (previousBottom < groundY && currentBottom >= groundY)
+        if (map.checkCollisionProjectile(positionNow, radius))
         {
-            const float t = (groundY - previousBottom) / (currentBottom - previousBottom);
-            const float impactX = previous.x + (positionNow.x - previous.x) * t;
-            ResolveImpact({ impactX, groundY });
+            ResolveImpact(positionNow);
         }
         else if (CheckPlayerImpact(positionNow))
         {
