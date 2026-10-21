@@ -173,6 +173,15 @@ bool Map::checkCollision(Rectangle entity) const
     }
     return false;
 }
+
+bool Map::checkCollisionProjectile(Vector2 center, float radius) const
+{
+    for (const Segment& segment : segments){
+        if (CheckCollisionCircleRec(center, radius, segment.getBounds())){return true;}
+    }
+    return false;
+}
+
 void Map::destroyTerrainAt(Vector2 impactPoint, float radius) {
 
 }
