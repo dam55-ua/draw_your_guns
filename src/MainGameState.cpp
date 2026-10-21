@@ -1,5 +1,8 @@
 #include <MainGameState.hpp>
+#include <GameOverState.hpp>
+#include <StateMachine.hpp>
 #include <raylib.h>
+#include <memory>
 
 MainGameState::MainGameState(): players{}, projectile(), explosion(), currentPlayerIndex(0), pendingShot(std::nullopt), 
 								map(GetScreenWidth(), GetScreenHeight())
@@ -170,6 +173,27 @@ void MainGameState::ResolveImpact(Vector2 impactPosition)
                                  bounds.y + bounds.height * 0.5f };
         const int damage = explosion.CalculateDamage(center, GameConfig::EXPLOSION_MAX_DAMAGE);
         if (damage > 0) player.ApplyDamage(static_cast<float>(damage));
+    }
+
+    CheckGameOver();
+}
+
+void MainGameState::CheckGameOver()
+{
+    for (const Player& player : players)
+    {
+        if (player.GetHp() > 0.0f) continue;
+
+        // Ganador: el equipo del jugador que siga con vida (o con mas vida en caso de empate).
+        const Player* winner = &players[(&player == &players[0]) ? 1 : 0];
+        for (const Player& other : players)
+        {
+            if (other.GetTeam() == player.GetTeam()) continue;
+            if (other.GetHp() >= winner->GetHp()) winner = &other;
+        }
+
+        state_machine->add_state(std::make_unique<GameOverState>(winner->GetTeam()), true);
+        return;
     }
 
     NextTurn();
