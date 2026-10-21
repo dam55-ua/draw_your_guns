@@ -26,6 +26,7 @@ class MainGameState : public GameState
         float GetGroundY() const;
         void NextTurn();
         void ResolveImpact(Vector2 impactPosition);
+        void CheckGameOver();
         bool CheckPlayerImpact(Vector2 impactPosition) const;
         void ClampPlayerBounds(Player& player, float& minX, float& maxX) const;
         bool HasWallAhead(const Player& player, float direction, float deltaTime) const;

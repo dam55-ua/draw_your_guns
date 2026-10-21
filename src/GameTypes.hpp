@@ -16,7 +16,7 @@ namespace GameConfig
     // Jugador
     const float PLAYER_WIDTH = 22.0f;
     const float PLAYER_HEIGHT = 32.0f;
-    const float PLAYER_MAX_HP = 100.0f;
+    const float PLAYER_MAX_HP = 10.0f;
     const float SCREEN_MARGIN = 10.0f;
     const float MAX_STEP_HEIGHT = 12.0f;
 
