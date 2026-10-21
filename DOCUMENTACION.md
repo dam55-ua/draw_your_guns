@@ -55,20 +55,19 @@ Para evitar partidas estancadas y aportar dinamismo, el escenario evoluciona seg
 ## 2. Estrategia de Gestión de Ramas (Git)
 
 * **Estrategia seleccionada:** GitHub Flow
-* **Justificación:** Se ha seleccionado GitHub Flow por ser un flujo de trabajo ligero, ágil y adecuado para un equipo reducido de 3 personas. Al tener un ciclo de desarrollo iterativo basado en entregas cortas, esta estrategia nos permite mantener una rama `main` siempre estable y desplegable. Cada nueva funcionalidad o corrección se desarrolla en ramas descriptivas derivadas de `main` (por ejemplo, `feature/player-controller`), integrándose mediante Pull Requests que requieren la revisión y aprobación de al menos un compañero antes del *merge*.
+* **Justificación:** Se ha seleccionado GitHub Flow por ser un flujo de trabajo ligero, ágil y adecuado para un equipo reducido de 3 personas. Al tener un ciclo de desarrollo iterativo basado en entregas cortas, esta estrategia nos permite mantener una rama `develop` siempre estable y desplegable (estrategia de despliegue aprobada por el profesor). Cada nueva funcionalidad o corrección se desarrolla en ramas descriptivas derivadas de `develop` (por ejemplo, `feat/player`), integrándose mediante Pull Requests que requieren la revisión y aprobación de al menos un compañero antes del *merge*.
 
 ---
 
 ## 3. Sistema de Bugtracking Elegido
-*(Herramienta elegida para la gestión de tareas e incidencias).*
 
-* **Herramienta elegida:** [La herramienta]
-* **Justificación:** [Explicar brevemente por qué la utilizamos y cómo gestionamos los tickets de fallos o mejoras].
+* **Herramienta elegida:** GitHub Issues
+* **Justificación:** Al alojar el proyecto en GitHub, usar GitHub Issues nos permite gestionar incidencias y tareas en la misma plataforma que el código, sin herramientas externas. Cada *issue* se etiqueta por tipo (bug, mejora, tarea), se asigna a quien lo trabaja y se vincula con el Pull Request que lo resuelve mediante referencias automáticas, manteniendo un historial trazable de cada fallo o funcionalidad.
+* **Automatización del triaje:** Pretendemos automatizar el triaje de los *issues* con **Jev** (modelo de decisión de TypeSafe, `typesafe/jev-1.13`) accesible a través de la API de Decisions de **OpenRouter**. A diferencia de un modelo de lenguaje genérico, Jev no genera texto sino que responde a preguntas tipadas (elección, sí/no o puntuación) devolviendo la probabilidad asociada, lo que nos permite clasificar cada *issue* entrante (tipo, urgencia, área asignada) y aplicar las etiquetas correspondientes con un umbral de confianza, integrado en un workflow de GitHub Actions. Las decisiones con confianza por debajo del umbral se descartan y quedan para revisión manual, de modo que la automatización funciona como una señal de apoyo al equipo y no como una autoridad que cierre o reasigne incidencias por sí sola.
 
 ---
 
 ## 4. Librerías Adicionales
-*(Aqui se justifica el uso de otras librerias o se explica que solo se utilizó raylib).*
 
 * **Raylib:** Utilizada para la gestión de gráficos, físicas básicas y entrada de usuario.
-* **[Otras librerías]:** [...].
+* **[Otras librerías]:** Para la entrega de este `Hito 1` no se han añadido otras librerias.
