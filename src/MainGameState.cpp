@@ -166,6 +166,8 @@ void MainGameState::ResolveImpact(Vector2 impactPosition)
     projectile.Deactivate();
     explosion.Activate(impactPosition);
 
+    map.destroyTerrainAt(impactPosition, explosion.GetRadius());
+
     for (Player& player : players)
     {
         const Rectangle bounds = player.GetBounds();
