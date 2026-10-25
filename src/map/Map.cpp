@@ -160,7 +160,7 @@ void Map::draw() const
     }
 }
 
-int Map::getGroundYAt(float x) const
+int Map::getGroundYAt(float x, float feetY) const
 {
     const int pixelX = static_cast<int>(std::floor(x));
 
@@ -168,7 +168,13 @@ int Map::getGroundYAt(float x) const
         return screenHeight;
     }
 
-    for (int y = 0; y < screenHeight; ++y)
+    // Empezar cerca de los pies del jugador, no arriba del mapa.
+    const int startY = std::max(
+        0,
+        static_cast<int>(std::floor(feetY)) - 1
+    );
+
+    for (int y = startY; y < screenHeight; ++y)
     {
         if (isSolid(pixelX, y)) {
             return y;
@@ -425,4 +431,9 @@ void Map::unloadTerrain()
         UnloadImage(terrainImage);
         terrainImage = {};
     }
+}
+
+Map::~Map()
+{
+    unloadTerrain();
 }

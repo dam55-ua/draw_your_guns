@@ -19,6 +19,8 @@ class MainGameState : public GameState
         void update(float deltaTime) override;
         void render() override;
 
+        void unloadResources();
+
         void pause() override {};
         void resume() override {};
 

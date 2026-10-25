@@ -55,6 +55,7 @@ private:
 
 public:
     Map(int screenWidth, int screenHeight, MapConfig config = MapConfig());
+    ~Map();
 
     void generateSpawnBases();
 
@@ -68,7 +69,7 @@ public:
 
     // Métodos de Física y Colisión para Jugadores y Proyectiles
     bool checkCollision(Rectangle entity) const;
-    int getGroundYAt(float x) const;
+    int getGroundYAt(float x, float feetY) const;
     void destroyTerrainAt(Vector2 impactPoint, float radius);
     bool checkCollisionProjectile(Vector2 center, float radius) const;
 

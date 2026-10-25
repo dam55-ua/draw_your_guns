@@ -107,7 +107,13 @@ void MainGameState::update(float deltaTime)
 
     for (Player& player : players)
     {
-        player.Update(deltaTime, map.getGroundYAt(player.GetPosition().x));
+        Vector2 position = player.GetPosition();
+
+        float groundY = static_cast<float>(
+            map.getGroundYAt(position.x, position.y)
+        );
+
+        player.Update(deltaTime, groundY);
     }
 
     projectile.Update(deltaTime);
@@ -262,4 +268,9 @@ void MainGameState::render()
 
     EndDrawing();
 	
+}
+
+void MainGameState::unloadResources()
+{
+    map.unloadTerrain();
 }
