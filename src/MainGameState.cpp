@@ -25,8 +25,8 @@ void MainGameState::init()
     const Rectangle b1 = bases[1].getBase();
 
     players.clear();
-    for(int i = 0; i < GameConfig::MAX_PLAYERS; ++i){
-        float t = (i + 0.5f) / GameConfig::MAX_PLAYERS;
+    for(int i = 0; i < GameConfig::MAX_PLAYERS_PER_TEAM; ++i){
+        float t = (i + 0.5f) / GameConfig::MAX_PLAYERS_PER_TEAM;
 
         players.emplace_back(Player::Team::Left,  Vector2{ b0.x + b0.width * t, b0.y });
         players.emplace_back(Player::Team::Right, Vector2{ b1.x + b1.width * t, b1.y });
@@ -256,14 +256,24 @@ void MainGameState::CheckGameOver(float leftHpBefore, float rightHpBefore)
             winner = Player::Team::Right;
         }
     }
-    
+
     state_machine->add_state(std::make_unique<GameOverState>(winner), true);
 }
 
 void MainGameState::NextTurn()
 {
-    currentPlayerIndex = (currentPlayerIndex + 1) % static_cast<int>(players.size());
-    players[currentPlayerIndex].ResetTurn();
+    const int count = static_cast<int>(players.size());
+
+    for (int step = 1; step <= count; ++step)
+    {
+        const int next = (currentPlayerIndex + step) % count;
+        if (players[next].GetHp() > 0.0f)
+        {
+            currentPlayerIndex = next;
+            players[currentPlayerIndex].ResetTurn();
+            return;
+        }
+    }
 }
 
 void MainGameState::RenderHud() const

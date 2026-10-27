@@ -19,7 +19,7 @@ namespace GameConfig
     const float PLAYER_MAX_HP = 100.0f;
     const float SCREEN_MARGIN = 10.0f;
     const float MAX_STEP_HEIGHT = 12.0f;
-    const int MAX_PLAYERS = 4;
+    const int MAX_PLAYERS_PER_TEAM = 4;
     // Escenario
     const float GROUND_HEIGHT = 48.0f;
     
