@@ -7,35 +7,35 @@ extern "C" {
 }
 
 int main()
-{ 
-    // El modo de pantalla completa se configura antes de crear la ventana.
+{
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 720, "Draw your guns!");
-    ToggleFullscreen();          // o SetWindowState(FLAG_FULLSCREEN_MODE)
+    ToggleFullscreen();
     SetTargetFPS(60);
 
     float delta_time = 0.0f;
 
-    StateMachine state_machine;
-    state_machine.add_state(std::make_unique<MainGameState>(), false);
-    state_machine.handle_state_changes(delta_time);
-
-    // Main game loop
-    while (!WindowShouldClose() && !state_machine.is_game_ending())
     {
-        if (WindowShouldClose())
+        StateMachine state_machine;
+
+        state_machine.add_state(std::make_unique<MainGameState>(), false);
+
+        state_machine.handle_state_changes(delta_time);
+
+        while (!WindowShouldClose() &&
+               !state_machine.is_game_ending())
         {
-            break;
+            delta_time = GetFrameTime();
+
+            state_machine.handle_state_changes(delta_time);
+            state_machine.getCurrentState()->handleInput();
+            state_machine.getCurrentState()->update(delta_time);
+            state_machine.getCurrentState()->render();
         }
 
-        // Se mide el tiempo entre frames para que la actualización no dependa de los FPS.
-        delta_time = GetFrameTime();
-        state_machine.handle_state_changes(delta_time);
-        state_machine.getCurrentState()->handleInput();
-        state_machine.getCurrentState()->update(delta_time);
-        state_machine.getCurrentState()->render();
-    }
+    } // StateMachine y sus estados se destruyen aquí.
 
     CloseWindow();
+
     return 0;
 }

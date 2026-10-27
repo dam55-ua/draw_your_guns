@@ -1,6 +1,7 @@
 #include "Map.hpp"
 #include <algorithm>
-
+#include <cmath>
+#include <cstring>
 
 Map::Map(int screenWidth, int screenHeight, MapConfig config){
     this->screenWidth = screenWidth;
@@ -125,6 +126,8 @@ void Map::generateTerrain()
 {
     generateSpawnBases();
     generateSegments();
+    buildTerrainMask();
+    updateTerrainTexture();
 }   
 
 // Actualización y Eventos 
@@ -134,56 +137,192 @@ void Map::update(int currentRound){
 
 void Map::draw() const
 {
-    // Terreno + franja de césped.
-    for (const Segment& segment : segments) {
-        const Rectangle bounds = segment.getBounds();
-        segment.draw();
-        DrawRectangle(bounds.x, bounds.y, bounds.width, config.grassHeight, GREEN);
+    // Dibujar el terreno destructible
+    if (terrainTexture.id != 0) {
+        DrawTexture(terrainTexture, 0, 0, WHITE);
     }
 
-    // Franja indestructible en el fondo.
-    const int bedrockHeight = screenHeight * config.bedrockHeightPercent / 100;
-    DrawRectangle(0, screenHeight - bedrockHeight, screenWidth, bedrockHeight, GRAY);
+    // Dibujar la roca indestructible del fondo
+    const int bedrockHeight =
+        screenHeight * config.bedrockHeightPercent / 100;
 
-    for (const SpawnBase& base : spawnBases){
+    DrawRectangle(
+        0,
+        screenHeight - bedrockHeight,
+        screenWidth,
+        bedrockHeight,
+        GRAY
+    );
+
+    // Dibujar las bases de los jugadores
+    for (const SpawnBase& base : spawnBases) {
         base.draw();
     }
 }
 
-int Map::getGroundYAt(float x) const
+int Map::getGroundYAt(float x, float feetY) const
 {
-    for (const Segment& segment : segments)
+    const int pixelX = static_cast<int>(std::floor(x));
+
+    if (pixelX < 0 || pixelX >= screenWidth) {
+        return screenHeight;
+    }
+
+    // Empezar cerca de los pies del jugador, no arriba del mapa.
+    const int startY = std::max(
+        0,
+        static_cast<int>(std::floor(feetY)) - 1
+    );
+
+    for (int y = startY; y < screenHeight; ++y)
     {
-        const Rectangle bounds = segment.getBounds();
-        if (x >= bounds.x && x <= bounds.x + bounds.width)
-        {
-            return bounds.y; // Retorna la coordenada Y del suelo en esa posición X
+        if (isSolid(pixelX, y)) {
+            return y;
         }
     }
-    return screenHeight; // Si no hay segmento, retorna el fondo de la pantalla
+
+    return screenHeight;
 }
 
 //Colisión
 bool Map::checkCollision(Rectangle entity) const
 {
-    for (const Segment& segment : segments){
-        if (segment.checkCollision(entity)){
-            return true;
+    if (terrainMask.empty()) {
+        return false;
+    }
+
+    const int minX = std::max(
+        0,
+        static_cast<int>(std::floor(entity.x))
+    );
+
+    const int maxX = std::min(
+        screenWidth - 1,
+        static_cast<int>(std::ceil(entity.x + entity.width)) - 1
+    );
+
+    const int minY = std::max(
+        0,
+        static_cast<int>(std::floor(entity.y))
+    );
+
+    const int maxY = std::min(
+        screenHeight - 1,
+        static_cast<int>(std::ceil(entity.y + entity.height)) - 1
+    );
+
+    for (int y = minY; y <= maxY; ++y)
+    {
+        for (int x = minX; x <= maxX; ++x)
+        {
+            if (isSolid(x, y)) {
+                return true;
+            }
         }
     }
+
     return false;
 }
 
 bool Map::checkCollisionProjectile(Vector2 center, float radius) const
 {
-    for (const Segment& segment : segments){
-        if (CheckCollisionCircleRec(center, radius, segment.getBounds())){return true;}
+    if (terrainMask.empty() || radius <= 0.0f) {
+        return false;
     }
+
+    const int minX = std::max(
+        0,
+        static_cast<int>(std::floor(center.x - radius))
+    );
+
+    const int maxX = std::min(
+        screenWidth - 1,
+        static_cast<int>(std::ceil(center.x + radius))
+    );
+
+    const int minY = std::max(
+        0,
+        static_cast<int>(std::floor(center.y - radius))
+    );
+
+    const int maxY = std::min(
+        screenHeight - 1,
+        static_cast<int>(std::ceil(center.y + radius))
+    );
+
+    const float radiusSquared = radius * radius;
+
+    for (int y = minY; y <= maxY; ++y)
+    {
+        for (int x = minX; x <= maxX; ++x)
+        {
+            if (!isSolid(x, y)) {
+                continue;
+            }
+
+            const float dx = x - center.x;
+            const float dy = y - center.y;
+
+            if (dx * dx + dy * dy <= radiusSquared) {
+                return true;
+            }
+        }
+    }
+
     return false;
 }
 
-void Map::destroyTerrainAt(Vector2 impactPoint, float radius) {
+void Map::destroyTerrainAt(Vector2 impactPoint, float radius)
+{
+    if (radius <= 0.0f || terrainMask.empty()) {
+        return;
+    }
 
+    const int bedrockHeight =
+        screenHeight * config.bedrockHeightPercent / 100;
+
+    const int bedrockY = screenHeight - bedrockHeight;
+
+    // Limites del area afectada
+    const int minX = std::max(
+        0,
+        static_cast<int>(std::floor(impactPoint.x - radius))
+    );
+
+    const int maxX = std::min(
+        screenWidth - 1,
+        static_cast<int>(std::ceil(impactPoint.x + radius))
+    );
+
+    const int minY = std::max(
+        0,
+        static_cast<int>(std::floor(impactPoint.y - radius))
+    );
+
+    const int maxY = std::min(
+        bedrockY - 1,
+        static_cast<int>(std::ceil(impactPoint.y + radius))
+    );
+
+    const float radiusSquared = radius * radius;
+
+    // Eliminar los pixeles dentro del circulo
+    for (int y = minY; y <= maxY; ++y)
+    {
+        for (int x = minX; x <= maxX; ++x)
+        {
+            const float dx = x - impactPoint.x;
+            const float dy = y - impactPoint.y;
+
+            if (dx * dx + dy * dy <= radiusSquared)
+            {
+                terrainMask[y * screenWidth + x] = 0;
+            }
+        }
+    }
+
+    // Actualizar la representacion visual
+    updateTerrainTexture();
 }
 
 
@@ -194,3 +333,107 @@ const std::vector<SpawnBase>& Map::getSpawnBases() const {
     return spawnBases;
 }
 //float Map::getWaterLevel() const;
+
+bool Map::isSolid(int x, int y) const
+{
+    if (x < 0 || x >= screenWidth ||
+        y < 0 || y >= screenHeight) {
+        return false;
+    }
+
+    if (terrainMask.empty()) {
+        return false;
+    }
+
+    return terrainMask[y * screenWidth + x] != 0;
+}
+
+
+// converts the terrain into a grid of solid and empty pixels: 1s and 0s
+void Map::buildTerrainMask()
+{
+    terrainMask.assign(screenWidth * screenHeight, 0);
+
+    for (const Segment& segment : segments)
+    {
+        Rectangle bounds = segment.getBounds();
+
+        int startX = std::max(0, static_cast<int>(bounds.x));
+        int endX = std::min(
+            screenWidth,
+            static_cast<int>(bounds.x + bounds.width)
+        );
+
+        int startY = std::max(0, static_cast<int>(bounds.y));
+
+        for (int x = startX; x < endX; ++x)
+        {
+            for (int y = startY; y < screenHeight; ++y)
+            {
+                terrainMask[y * screenWidth + x] = 1;
+            }
+        }
+    }
+}
+
+//generates a transparent image and fills its solid pixels with brown. 
+
+void Map::updateTerrainTexture()
+{
+    if (terrainImage.data != nullptr) {
+        UnloadImage(terrainImage);
+        terrainImage = {};
+    }
+
+    terrainImage = GenImageColor(screenWidth, screenHeight, BLANK);
+
+    Color* pixels = static_cast<Color*>(terrainImage.data);
+
+    for (int y = 0; y < screenHeight; ++y)
+    {
+        for (int x = 0; x < screenWidth; ++x)
+        {
+            if (isSolid(x, y))
+            {
+                bool grass = false;
+
+                // Comprobar si estamos cerca de la superficie
+                for (int offset = 1; offset <= config.grassHeight; ++offset)
+                {
+                    if (!isSolid(x, y - offset)) {
+                        grass = true;
+                        break;
+                    }
+                }
+
+                pixels[y * screenWidth + x] = grass ? GREEN : BROWN;
+            }
+        }
+    }
+
+    if (terrainTexture.id != 0) {
+        UnloadTexture(terrainTexture);
+    }
+
+    terrainTexture = LoadTextureFromImage(terrainImage);
+}
+
+
+//cleanup
+void Map::unloadTerrain()
+{
+    if (terrainTexture.id != 0) {
+        UnloadTexture(terrainTexture);
+        terrainTexture = {};
+    }
+
+    if (terrainImage.data != nullptr) {
+        UnloadImage(terrainImage);
+        terrainImage = {};
+    }
+}
+
+Map::~Map()
+{
+    unloadTerrain();
+}

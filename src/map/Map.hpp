@@ -4,6 +4,7 @@
 #include "Segment.hpp"
 #include "SpawnBase.hpp"
 #include "TerrainProfile.hpp"
+#include <cstdint>
 
 // Configuración del Mapa predeterminada
 struct MapConfig
@@ -34,6 +35,18 @@ private:
     TerrainProfile buildTerrainProfile() const;
     Segment makeSegment(int leftX, int rightX, const TerrainProfile& profile) const;
     bool isInsideSpawnBase(float x) const;
+    // 1 = terreno sólido, 0 = espacio vacío
+    std::vector<std::uint8_t> terrainMask;
+
+    // Representación visual del terreno
+    Image terrainImage = {};
+    Texture2D terrainTexture = {};
+
+    // Acceso al terreno por píxeles
+    bool isSolid(int x, int y) const;
+    void buildTerrainMask();
+    void updateTerrainTexture();
+
 
 
    /*// Gestión del Evento Dinámico: Subida del Nivel del Mar
@@ -42,6 +55,7 @@ private:
 
 public:
     Map(int screenWidth, int screenHeight, MapConfig config = MapConfig());
+    ~Map();
 
     void generateSpawnBases();
 
@@ -55,7 +69,7 @@ public:
 
     // Métodos de Física y Colisión para Jugadores y Proyectiles
     bool checkCollision(Rectangle entity) const;
-    int getGroundYAt(float x) const;
+    int getGroundYAt(float x, float feetY) const;
     void destroyTerrainAt(Vector2 impactPoint, float radius);
     bool checkCollisionProjectile(Vector2 center, float radius) const;
 
@@ -63,4 +77,6 @@ public:
     const std::vector<Segment>& getSegments() const;
     const std::vector<SpawnBase>& getSpawnBases() const;
     //float getWaterLevel() const;
+
+    void unloadTerrain();
 };
