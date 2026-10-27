@@ -21,10 +21,17 @@ void MainGameState::init()
 
     // Spawnean los jugadores
     const std::vector<SpawnBase>& bases = map.getSpawnBases();
+    const Rectangle b0 = bases[0].getBase();
+    const Rectangle b1 = bases[1].getBase();
 
     players.clear();
-    players.emplace_back(Player::Team::Left,  bases[0].getSpawnCoords());
-    players.emplace_back(Player::Team::Right, bases[1].getSpawnCoords());
+    for(int i = 0; i < GameConfig::MAX_PLAYERS; ++i){
+        const float t = (i + 0.5f) / GameConfig::MAX_PLAYERS;
+
+        players.emplace_back(Player::Team::Left,  Vector2{ b0.x + b0.width * t, b0.y });
+        players.emplace_back(Player::Team::Right, Vector2{ b1.x + b1.width * t, b1.y });
+    }
+
 
     projectile = Projectile();
     explosion = Explosion();
@@ -44,6 +51,7 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
     for (const Player& other : players)
     {
         if (&other == &player) continue;
+        if (other.GetTeam() == player.GetTeam()) continue;   // la separacion minima solo aplica contra el equipo enemigo
 
         if (player.GetTeam() == Player::Team::Left)
         {
@@ -228,13 +236,16 @@ void MainGameState::RenderHud() const
         DrawText(TextFormat("%s: %.0f HP", name, players[i].GetHp()), 20, 76 + i * 24, 18, color);
     }
 
+    
+    const float lastShotY = 76.0f + static_cast<float>(players.size()) * 24.0f + 4.0f;
     if (pendingShot.has_value())
     {
         const ShotData& shot = *pendingShot;
         DrawText(TextFormat("Ultimo disparo [feat/proyectile]: origen (%.0f, %.0f), angulo %.0f, potencia %.0f",
                             shot.origin.x, shot.origin.y, shot.angleDeg, shot.power),
-                 20, 128, 18, MAROON);
+                 20, lastShotY, 18, MAROON);
     }
+    
 
     DrawText("Raton: apuntar | Click: disparar | ENTER: pasar turno",
              20, GetScreenHeight() - 56, 18, GRAY);
