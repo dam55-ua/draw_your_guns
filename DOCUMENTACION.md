@@ -55,7 +55,7 @@ Para evitar partidas estancadas y aportar dinamismo, el escenario evoluciona seg
 ## 2. Estrategia de Gestión de Ramas (Git)
 
 * **Estrategia seleccionada:** GitHub Flow
-* **Justificación:** Se ha seleccionado GitHub Flow por ser un flujo de trabajo ligero, ágil y adecuado para un equipo reducido de 3 personas. Al tener un ciclo de desarrollo iterativo basado en entregas cortas, esta estrategia nos permite mantener una rama `develop` siempre estable y desplegable (estrategia de despliegue aprobada por el profesor). Cada nueva funcionalidad o corrección se desarrolla en ramas descriptivas derivadas de `develop` (por ejemplo, `feat/player`), integrándose mediante Pull Requests que requieren la revisión y aprobación de al menos un compañero antes del *merge*.
+* **Justificación:** Se ha seleccionado GitHub Flow por ser un flujo de trabajo ligero, ágil y adecuado para un equipo reducido de 3 personas. Al tener un ciclo de desarrollo iterativo basado en entregas cortas, esta estrategia nos permite mantener una rama `develop` siempre estable y desplegable. Cada nueva funcionalidad o corrección se desarrolla en ramas descriptivas derivadas de `develop` (por ejemplo, `feat/player`), integrándose mediante Pull Requests que requieren la revisión y aprobación de al menos un compañero antes del *merge*.
 
 ---
 
