@@ -21,10 +21,17 @@ void MainGameState::init()
 
     // Spawnean los jugadores
     const std::vector<SpawnBase>& bases = map.getSpawnBases();
+    const Rectangle b0 = bases[0].getBase();
+    const Rectangle b1 = bases[1].getBase();
 
     players.clear();
-    players.emplace_back(Player::Team::Left,  bases[0].getSpawnCoords());
-    players.emplace_back(Player::Team::Right, bases[1].getSpawnCoords());
+    for(int i = 0; i < GameConfig::MAX_PLAYERS_PER_TEAM; ++i){
+        float t = (i + 0.5f) / GameConfig::MAX_PLAYERS_PER_TEAM;
+
+        players.emplace_back(Player::Team::Left,  Vector2{ b0.x + b0.width * t, b0.y });
+        players.emplace_back(Player::Team::Right, Vector2{ b1.x + b1.width * t, b1.y });
+    }
+
 
     projectile = Projectile();
     explosion = Explosion();
@@ -44,6 +51,7 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
     for (const Player& other : players)
     {
         if (&other == &player) continue;
+        if (other.GetTeam() == player.GetTeam()) continue;   // la separacion minima solo aplica contra el equipo enemigo
 
         if (player.GetTeam() == Player::Team::Left)
         {
@@ -174,6 +182,20 @@ void MainGameState::ResolveImpact(Vector2 impactPosition)
 
     map.destroyTerrainAt(impactPosition, explosion.GetRadius());
 
+    // Vida total de cada equipo antes de la explosion: sirve de criterio de desempate
+    // si la misma explosion elimina a los dos equipos a la vez.
+    float leftHpBefore = 0.0f;
+    float rightHpBefore = 0.0f;
+    for (const Player& player : players)
+    {
+        if (player.GetTeam() == Player::Team::Left){
+            leftHpBefore += player.GetHp();
+        } 
+        else{
+            rightHpBefore += player.GetHp(); 
+        }
+    }
+
     for (Player& player : players)
     {
         const Rectangle bounds = player.GetBounds();
@@ -183,34 +205,75 @@ void MainGameState::ResolveImpact(Vector2 impactPosition)
         if (damage > 0) player.ApplyDamage(static_cast<float>(damage));
     }
 
-    CheckGameOver();
+    CheckGameOver(leftHpBefore, rightHpBefore);
 }
 
-void MainGameState::CheckGameOver()
+void MainGameState::CheckGameOver(float leftHpBefore, float rightHpBefore)
 {
+    bool leftAlive = false;
+    bool rightAlive = false;
+
     for (const Player& player : players)
     {
-        if (player.GetHp() > 0.0f) continue;
+        if (player.GetHp() <= 0.0f) continue;
 
-        // Ganador: el equipo del jugador que siga con vida (o con mas vida en caso de empate).
-        const Player* winner = &players[(&player == &players[0]) ? 1 : 0];
-        for (const Player& other : players)
-        {
-            if (other.GetTeam() == player.GetTeam()) continue;
-            if (other.GetHp() >= winner->GetHp()) winner = &other;
+        if (player.GetTeam() == Player::Team::Left){
+            leftAlive = true;
         }
+        else{
+            rightAlive = true;
+        }
+    }
 
-        state_machine->add_state(std::make_unique<GameOverState>(winner->GetTeam()), true);
+    // La partida continua mientras quede al menos un jugador vivo en cada equipo.
+    if (leftAlive && rightAlive)
+    {
+        NextTurn();
         return;
     }
 
-    NextTurn();
+    // Doble KO: gana el equipo que mas vida tenia antes de la explosion.
+    Player::Team winner = Player::Team::Left;
+    if (!leftAlive && !rightAlive)
+    {
+        if(rightHpBefore > leftHpBefore)
+        {
+            winner = Player::Team::Right;
+        }
+        else
+        {
+            winner = Player::Team::Left;
+        }
+    }
+    else
+    {
+        if(leftAlive)
+        {
+            winner = Player::Team::Left;
+        }
+        else
+        {
+            winner = Player::Team::Right;
+        }
+    }
+
+    state_machine->add_state(std::make_unique<GameOverState>(winner), true);
 }
 
 void MainGameState::NextTurn()
 {
-    currentPlayerIndex = (currentPlayerIndex + 1) % static_cast<int>(players.size());
-    players[currentPlayerIndex].ResetTurn();
+    const int count = static_cast<int>(players.size());
+
+    for (int step = 1; step <= count; ++step)
+    {
+        const int next = (currentPlayerIndex + step) % count;
+        if (players[next].GetHp() > 0.0f)
+        {
+            currentPlayerIndex = next;
+            players[currentPlayerIndex].ResetTurn();
+            return;
+        }
+    }
 }
 
 void MainGameState::RenderHud() const
@@ -228,13 +291,16 @@ void MainGameState::RenderHud() const
         DrawText(TextFormat("%s: %.0f HP", name, players[i].GetHp()), 20, 76 + i * 24, 18, color);
     }
 
+    
+    const float lastShotY = 76.0f + static_cast<float>(players.size()) * 24.0f + 4.0f;
     if (pendingShot.has_value())
     {
         const ShotData& shot = *pendingShot;
         DrawText(TextFormat("Ultimo disparo [feat/proyectile]: origen (%.0f, %.0f), angulo %.0f, potencia %.0f",
                             shot.origin.x, shot.origin.y, shot.angleDeg, shot.power),
-                 20, 128, 18, MAROON);
+                 20, lastShotY, 18, MAROON);
     }
+    
 
     DrawText("Raton: apuntar | Click: disparar | ENTER: pasar turno",
              20, GetScreenHeight() - 56, 18, GRAY);
