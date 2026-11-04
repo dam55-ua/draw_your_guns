@@ -32,23 +32,33 @@ El bucle jugable se articula a través de las siguientes mecánicas fundamentale
 ### 1.3. Componentes y Sistemas Especiales
 
 #### A. Taller/Editor de Armas Dibujadas
-Durante su turno, el jugador puede desplegar un menú emergente con un lienzo en blanco para personalizar y crear sus propias proyectiles o estructuras:
-* **Formas geométricas y comportamiento:**
-  * **Círculos:** Generan proyectiles de tipo *Granada*.
-  * **Rectángulos:** Permiten generar *Paredes* o coberturas estáticas en el terreno.
+Durante su turno, el jugador puede desplegar un menú emergente para poder elegir el tipo de arma a usar:
+* **Armas:**
+  * **Granada:** Es el proyectil por defecto. Destruye mapa en mayor medida.
+  * **Bazocta:** Es un misil. Destruye mas mapa que la granada
+  * **Pistola:** En linea recta se dispara una bala. Deja pequeño impacto en el mapa.
+  * **Escopeta:** En angulo de 60º se disparan multiples balas. Destruye igual que pistola.
+  * **Francotirador:** Dispara bala de gran daño en linea recta. Destruye hasta cierto punto.
+  * **Bate:** A mele, empuja al player enemigo aplicando daño. No destruye mapa.
 * **Equilibrio de juego y economía:**
   * **Tamaño limitado:** Existe una dimensión máxima permitida según la categoría de la forma.
   * **Relación Daño/Coste:** A mayor tamaño de la forma dibujada, mayor será el daño infligido.
   * **Coste en Créditos:** Dibujar formas de mayor tamaño consume más *créditos*, los cuales se deben haber acumulado previamente mediante la *Recompensa por impacto*.
+#### B. Editor de estructuras.
+Durante el turno del jugador este puede desplegar un menú emergente para poder elegir el tipo de estructura a colocar en el mapa.
+  * **Suelo:** Linea gruesa que se puede colocar a forma de suelo.
+  * **Pared:** Estructura vertical para poder cubrirte de los distintos proyectiles.
+  * **Escalera:** Estructura en forma de triangulo rectangulo para poder acceder a lugares dificiles.
 
-#### B. Personalización de Personajes
-* Menú de selección previo a la partida para elegir accesorios en la cabeza (gorros, cascos, etc.).
+#### C. Personalización de Personajes
+* Menú de selección previo a la partida (pantalla inicial) para elegir accesorios en la cabeza (gorros, cascos, etc.) y dibujar la cara del personaje.
 * La base y figura de los personajes se mantiene uniforme para todos los jugadores.
 
-#### C. Eventos Dinámicos de Mapa
-Para evitar partidas estancadas y aportar dinamismo, el escenario evoluciona según el número de ronda actual:
-* **Ataque Aéreo (Rondas múltiplos de 5):** Caída masiva de proyectiles tipo racimo/misiles desde la parte superior de la pantalla. No cubren la totalidad del mapa, obligando a buscar cobertura.
+#### D. Eventos Dinámicos de Mapa
+Para evitar partidas estancadas y aportar dinamismo, el escenario evoluciona según el número de ronda actual. Estos se seleccionan en la pantalla antes de iniciar el mapa:
+* **Ataque Aéreo (A partir de la ronda 20 por multiplos de 3):** Caída masiva de proyectiles tipo racimo/misiles desde la parte superior de la pantalla. No cubren la totalidad del mapa, obligando a buscar cobertura.
 * **Subida del Nivel del Mar (A partir de la ronda 17):** Un bloque que representa el agua asciende desde el límite inferior del mapa. La velocidad de ascenso se incrementa de forma exponencial o proporcional con cada nueva ronda transcurrida.
+* **UFO Loco (Ronda 6)**: Aparece un UFO que destruye una parte significativa del mapa. Normalmente el centro.  
 
 ---
 
