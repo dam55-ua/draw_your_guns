@@ -1,5 +1,5 @@
 #include <StateMachine.hpp>
-#include <MainGameState.hpp>
+#include <MainMenuState.hpp>
 #include <memory>
 
 extern "C" {
@@ -10,6 +10,7 @@ int main()
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1280, 720, "Draw your guns!");
+    SetExitKey(KEY_NULL);
     ToggleFullscreen();
     SetTargetFPS(60);
 
@@ -18,7 +19,7 @@ int main()
     {
         StateMachine state_machine;
 
-        state_machine.add_state(std::make_unique<MainGameState>(), false);
+        state_machine.add_state(std::make_unique<MainMenuState>(), false);
 
         state_machine.handle_state_changes(delta_time);
 
