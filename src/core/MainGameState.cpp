@@ -1,5 +1,6 @@
 #include <MainGameState.hpp>
 #include <GameOverState.hpp>
+#include <PauseState.hpp>
 #include <StateMachine.hpp>
 #include <raylib.h>
 #include <memory>
@@ -71,6 +72,11 @@ void MainGameState::ClampPlayerBounds(Player& player, float& minX, float& maxX) 
 
 void MainGameState::handleInput()
 {
+    if (IsKeyPressed(KEY_ESCAPE))
+    {
+        state_machine->add_state(std::make_unique<PauseState>(*this), false);
+        return;
+    }
     if (projectile.IsActive()) return;
 
     Player& current = players[currentPlayerIndex];
@@ -90,6 +96,23 @@ void MainGameState::handleInput()
 
 void MainGameState::update(float deltaTime)
 {
+    if (restartRequested)
+    {
+        state_machine->add_state(std::make_unique<MainGameState>(), true);
+        return;
+    }
+
+    if (abandonRequested)
+    {
+        // Abandona el equipo del jugador actual: gana el rival.
+        const Player::Team currentTeam = players[currentPlayerIndex].GetTeam();
+        const Player::Team winner = (currentTeam == Player::Team::Left)
+                                  ? Player::Team::Right
+                                  : Player::Team::Left;
+
+        state_machine->add_state(std::make_unique<GameOverState>(winner), true);
+        return;
+    }
     Player& current = players[currentPlayerIndex];
 
     if (!projectile.IsActive())
@@ -275,6 +298,16 @@ void MainGameState::NextTurn()
         }
     }
 }
+void MainGameState::RequestAbandon()
+{
+    abandonRequested = true;
+}
+
+void MainGameState::RequestRestart()
+{
+    restartRequested = true;
+}
+
 
 void MainGameState::RenderHud() const
 {
@@ -304,8 +337,8 @@ void MainGameState::RenderHud() const
 
     DrawText("Raton: apuntar | Click: disparar | ENTER: pasar turno",
              20, GetScreenHeight() - 56, 18, GRAY);
-    DrawText("A/D o Flechas: mover | W: saltar | ESC: salir",
-             20, GetScreenHeight() - 30, 18, DARKGRAY);
+    DrawText("A/D o Flechas: mover | W: saltar | ESC: pausa",
+              20, GetScreenHeight() - 30, 18, DARKGRAY);
 }
 
 void MainGameState::render()

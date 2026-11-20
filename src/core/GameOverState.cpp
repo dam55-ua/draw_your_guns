@@ -1,5 +1,6 @@
 #include <GameOverState.hpp>
 #include <MainGameState.hpp>
+#include <MainMenuState.hpp>
 #include <StateMachine.hpp>
 #include <raylib.h>
 
@@ -23,6 +24,10 @@ void GameOverState::handleInput()
     {
         // Reemplaza este estado con una partida nueva (init() regenera el mapa).
         state_machine->add_state(std::make_unique<MainGameState>(), true);
+    }
+    else if (IsKeyPressed(KEY_ESCAPE))
+    {
+        state_machine->add_state(std::make_unique<MainMenuState>(), true);
     }
 }
 
@@ -54,6 +59,10 @@ void GameOverState::render()
         DrawText(restartMsg,
                  (GetScreenWidth() - MeasureText(restartMsg, 20)) / 2,
                  GetScreenHeight() / 2 + 60, 20, LIGHTGRAY);
+        const char* menuMsg = "ESC: menu principal";
+        DrawText(menuMsg,
+                (GetScreenWidth() - MeasureText(menuMsg, 20)) / 2,
+                GetScreenHeight() / 2 + 95, 20, LIGHTGRAY);
 
     EndDrawing();
 }
