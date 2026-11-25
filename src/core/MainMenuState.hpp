@@ -24,9 +24,7 @@ class MainMenuState : public GameState
         void DrawLogo() const;
 
         Texture2D logo = {};
-        bool logoLoaded = false;
         Font font = {};
-        bool fontLoaded = false;
 
         UILayout layout;
         std::vector<MenuButton> buttons;

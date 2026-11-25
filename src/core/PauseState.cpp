@@ -97,62 +97,63 @@ void PauseState::render()
 {
     BeginDrawing();
 
-        ClearBackground(BLACK);
+    ClearBackground(BLACK);
 
-        const int width  = GetScreenWidth();
-        const int height = GetScreenHeight();
+    const int width  = GetScreenWidth();
+    const int height = GetScreenHeight();
 
-        // Escala sencilla, misma proporcion que el lienzo 1280x720.
-        const float scale = static_cast<float>(height) / 720.0f;
+    // Escala sencilla, misma proporcion que el lienzo 1280x720.
+    const float scale = static_cast<float>(height) / 720.0f;
 
-        const char* title = "PAUSA";
-        const int titleSize = static_cast<int>(52.0f * scale);
-        DrawText(title, (width - MeasureText(title, titleSize)) / 2,
-                 static_cast<int>(height * 0.18f), titleSize, RAYWHITE);
+    const char* title = "PAUSA";
+    const int titleSize = static_cast<int>(52.0f * scale);
+    DrawText(title, (width - MeasureText(title, titleSize)) / 2,
+             static_cast<int>(height * 0.18f), titleSize, RAYWHITE);
 
-        if (confirm != Confirm::None)
-        {
-            const char* line1 = (confirm == Confirm::Abandon)
-                              ? "El equipo rival ganara la partida."
-                              : "Cerrar el juego?";
-            const char* line2 = "Seguro?   S / N";
-
-            const int size1 = static_cast<int>(28.0f * scale);
-            const int size2 = static_cast<int>(22.0f * scale);
-
-            DrawText(line1, (width - MeasureText(line1, size1)) / 2,
-                     static_cast<int>(height * 0.45f), size1, RAYWHITE);
-            DrawText(line2, (width - MeasureText(line2, size2)) / 2,
-                     static_cast<int>(height * 0.55f), size2, LIGHTGRAY);
+    if (confirm != Confirm::None)
+    {
+        const char* line1 = "Cerrar el juego?";
+        if (confirm == Confirm::Abandon){
+            line1 = "El equipo rival ganara la partida.";
         }
-        else
-        {
-            const int size = static_cast<int>(30.0f * scale);
-            const int startY = static_cast<int>(height * 0.40f);
-            const int gap = static_cast<int>(56.0f * scale);
+        const char* line2 = "Seguro?   S / N";
 
-            for (int i = 0; i < OPTION_COUNT; ++i)
+        const int size1 = static_cast<int>(28.0f * scale);
+        const int size2 = static_cast<int>(22.0f * scale);
+
+        DrawText(line1, (width - MeasureText(line1, size1)) / 2,
+                 static_cast<int>(height * 0.45f), size1, RAYWHITE);
+        DrawText(line2, (width - MeasureText(line2, size2)) / 2,
+                 static_cast<int>(height * 0.55f), size2, LIGHTGRAY);
+    }
+    else
+    {
+        const int size = static_cast<int>(30.0f * scale);
+        const int startY = static_cast<int>(height * 0.40f);
+        const int gap = static_cast<int>(56.0f * scale);
+
+        for (int i = 0; i < OPTION_COUNT; ++i)
+        {
+            const int textWidth = MeasureText(OPTIONS[i], size);
+            const int x = (width - textWidth) / 2;
+            const int y = startY + i * gap;
+
+            if (i == selected)
             {
-                const int textWidth = MeasureText(OPTIONS[i], size);
-                const int x = (width - textWidth) / 2;
-                const int y = startY + i * gap;
-
-                if (i == selected)
-                {
-                    DrawText(">", x - static_cast<int>(40.0f * scale), y, size, YELLOW);
-                    DrawText(OPTIONS[i], x, y, size, RAYWHITE);
-                }
-                else
-                {
-                    DrawText(OPTIONS[i], x, y, size, GRAY);
-                }
+                DrawText(">", x - static_cast<int>(40.0f * scale), y, size, YELLOW);
+                DrawText(OPTIONS[i], x, y, size, RAYWHITE);
             }
-
-            const char* hint = "ESC: continuar";
-            const int hintSize = static_cast<int>(18.0f * scale);
-            DrawText(hint, (width - MeasureText(hint, hintSize)) / 2,
-                     height - static_cast<int>(60.0f * scale), hintSize, DARKGRAY);
+            else
+            {
+                DrawText(OPTIONS[i], x, y, size, GRAY);
+            }
         }
+
+        const char* hint = "ESC: continuar";
+        const int hintSize = static_cast<int>(18.0f * scale);
+        DrawText(hint, (width - MeasureText(hint, hintSize)) / 2,
+                 height - static_cast<int>(60.0f * scale), hintSize, DARKGRAY);
+    }
 
     EndDrawing();
 }

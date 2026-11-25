@@ -106,13 +106,14 @@ void MainGameState::update(float deltaTime)
     {
         // Abandona el equipo del jugador actual: gana el rival.
         const Player::Team currentTeam = players[currentPlayerIndex].GetTeam();
-        const Player::Team winner = (currentTeam == Player::Team::Left)
-                                  ? Player::Team::Right
-                                  : Player::Team::Left;
+        Player::Team winner = Player::Team::Left;
+        if (currentTeam == Player::Team::Left)
+            winner = Player::Team::Right;
 
         state_machine->add_state(std::make_unique<GameOverState>(winner), true);
         return;
     }
+
     Player& current = players[currentPlayerIndex];
 
     if (!projectile.IsActive())

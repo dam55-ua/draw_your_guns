@@ -46,7 +46,12 @@ void MenuButton::Draw(const UILayout& layout, const Font& font) const
         r.width  - border * 2.0f,
         r.height - border * 2.0f
     };
-    DrawRectangleRounded(inner, 0.25f, 8, focused ? FILL_FOCUS : FILL);
+
+    Color fill = FILL;
+    if (focused)
+        fill = FILL_FOCUS;
+
+    DrawRectangleRounded(inner, 0.25f, 8, fill);
 
     const float size = layout.ScaleValue(30.0f);
     const float spacing = layout.ScaleValue(1.0f);
