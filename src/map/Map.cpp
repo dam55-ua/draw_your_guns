@@ -142,22 +142,22 @@ void Map::draw() const
         DrawTexture(terrainTexture, 0, 0, WHITE);
     }
 
-    // Dibujar la roca indestructible del fondo
-    const int bedrockHeight =
-        screenHeight * config.bedrockHeightPercent / 100;
-
-    DrawRectangle(
-        0,
-        screenHeight - bedrockHeight,
-        screenWidth,
-        bedrockHeight,
-        GRAY
-    );
+    drawWater();
 
     // Dibujar las bases de los jugadores
     for (const SpawnBase& base : spawnBases) {
         base.draw();
     }
+}
+
+void Map::drawWater() const
+{
+    const int waterTop = getWaterTopY();
+    const int waterHeight = screenHeight - waterTop;
+
+    // Base del agua
+    DrawRectangle(0, waterTop, screenWidth, waterHeight, BLUE);
+    DrawRectangle(0, waterTop, screenWidth, 2, SKYBLUE);
 }
 
 int Map::getGroundYAt(float x, float feetY) const
@@ -182,6 +182,13 @@ int Map::getGroundYAt(float x, float feetY) const
     }
 
     return screenHeight;
+}
+
+//Getter Nivel de Agua
+int Map::getWaterTopY() const
+{
+    const int waterHeight = std::max(1, screenHeight * config.waterHeightPercent / 100);
+    return screenHeight - waterHeight;
 }
 
 //Colisión
@@ -278,10 +285,7 @@ void Map::destroyTerrainAt(Vector2 impactPoint, float radius)
         return;
     }
 
-    const int bedrockHeight =
-        screenHeight * config.bedrockHeightPercent / 100;
-
-    const int bedrockY = screenHeight - bedrockHeight;
+    const int waterTopY = getWaterTopY();
 
     // Limites del area afectada
     const int minX = std::max(
@@ -300,7 +304,7 @@ void Map::destroyTerrainAt(Vector2 impactPoint, float radius)
     );
 
     const int maxY = std::min(
-        bedrockY - 1,
+        waterTopY - 1,
         static_cast<int>(std::ceil(impactPoint.y + radius))
     );
 
@@ -332,7 +336,6 @@ const std::vector<Segment>& Map::getSegments() const {
 const std::vector<SpawnBase>& Map::getSpawnBases() const {
     return spawnBases;
 }
-//float Map::getWaterLevel() const;
 
 bool Map::isSolid(int x, int y) const
 {
@@ -354,6 +357,8 @@ void Map::buildTerrainMask()
 {
     terrainMask.assign(screenWidth * screenHeight, 0);
 
+    const int waterTopY = getWaterTopY();
+
     for (const Segment& segment : segments)
     {
         Rectangle bounds = segment.getBounds();
@@ -368,7 +373,7 @@ void Map::buildTerrainMask()
 
         for (int x = startX; x < endX; ++x)
         {
-            for (int y = startY; y < screenHeight; ++y)
+            for (int y = startY; y < waterTopY; ++y)
             {
                 terrainMask[y * screenWidth + x] = 1;
             }
