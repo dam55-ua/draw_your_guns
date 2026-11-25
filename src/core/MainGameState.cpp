@@ -146,6 +146,13 @@ void MainGameState::update(float deltaTime)
         );
 
         player.Update(deltaTime, groundY);
+
+        if (player.GetHp() > 0.0f &&
+            player.GetPosition().y >= static_cast<float>(map.getWaterTopY()))
+        {
+            player.ApplyDamage(GameConfig::PLAYER_MAX_HP);
+            CheckGameOver();
+        }
     }
 
     projectile.Update(deltaTime);

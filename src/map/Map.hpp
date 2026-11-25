@@ -17,7 +17,7 @@ struct MapConfig
     int grassHeight = 8;
     int baseWidthPercent = 6;
     int baseHeightPercent = 40;
-    int bedrockHeightPercent = 1;
+    int waterHeightPercent = 2;
 };
 
 class Map
@@ -46,12 +46,7 @@ private:
     bool isSolid(int x, int y) const;
     void buildTerrainMask();
     void updateTerrainTexture();
-
-
-
-   /*// Gestión del Evento Dinámico: Subida del Nivel del Mar
-    float waterLevel;
-    float waterRiseSpeed;*/
+    void drawWater() const;
 
 public:
     Map(int screenWidth, int screenHeight, MapConfig config = MapConfig());
@@ -70,13 +65,13 @@ public:
     // Métodos de Física y Colisión para Jugadores y Proyectiles
     bool checkCollision(Rectangle entity) const;
     int getGroundYAt(float x, float feetY) const;
+    int getWaterTopY() const;
     void destroyTerrainAt(Vector2 impactPoint, float radius);
     bool checkCollisionProjectile(Vector2 center, float radius) const;
 
     // Getters por referencia constante (Optimización de memoria)
     const std::vector<Segment>& getSegments() const;
     const std::vector<SpawnBase>& getSpawnBases() const;
-    //float getWaterLevel() const;
 
     void unloadTerrain();
 };
