@@ -7,7 +7,7 @@
 // Evita que la misma pulsacion que mato al jugador reinicie al instante.
 static constexpr float MIN_TIME_BEFORE_RESTART = 0.5f;
 
-GameOverState::GameOverState(Player::Team winnerTeam): winnerTeam(winnerTeam), elapsed(0.0f)
+GameOverState::GameOverState(Result result): result(result), elapsed(0.0f)
 {
 }
 
@@ -42,27 +42,44 @@ void GameOverState::render()
 
         ClearBackground(DARKGRAY);
 
-        const char* teamName = (winnerTeam == Player::Team::Left) ? "IZQUIERDA" : "DERECHA";
-        const Color teamColor = (winnerTeam == Player::Team::Left) ? BLUE : RED;
-
         const char* title = "GAME OVER";
         DrawText(title,
                  (GetScreenWidth() - MeasureText(title, 80)) / 2,
                  GetScreenHeight() / 2 - 120, 80, RAYWHITE);
 
-        const char* winnerMsg = TextFormat("Ha ganado el equipo %s", teamName);
-        DrawText(winnerMsg,
-                 (GetScreenWidth() - MeasureText(winnerMsg, 40)) / 2,
-                 GetScreenHeight() / 2 - 20, 40, teamColor);
+        if (result == Result::Draw)
+        {
+            const char* drawMsg = "EMPATE";
+            DrawText(drawMsg,
+                     (GetScreenWidth() - MeasureText(drawMsg, 40)) / 2,
+                     GetScreenHeight() / 2 - 20, 40, RAYWHITE);
+        }
+        else
+        {
+            const char* teamName = "DERECHA";
+            Color teamColor = RED;
+
+            if (result == Result::LeftWins)
+            {
+                teamName = "IZQUIERDA";
+                teamColor = BLUE;
+            }
+
+            const char* winnerMsg = TextFormat("Ha ganado el equipo %s", teamName);
+            DrawText(winnerMsg,
+                     (GetScreenWidth() - MeasureText(winnerMsg, 40)) / 2,
+                     GetScreenHeight() / 2 - 20, 40, teamColor);
+        }
 
         const char* restartMsg = "Pulsa INTRO o ESPACIO para volver a jugar";
         DrawText(restartMsg,
                  (GetScreenWidth() - MeasureText(restartMsg, 20)) / 2,
                  GetScreenHeight() / 2 + 60, 20, LIGHTGRAY);
+
         const char* menuMsg = "ESC: menu principal";
         DrawText(menuMsg,
-                (GetScreenWidth() - MeasureText(menuMsg, 20)) / 2,
-                GetScreenHeight() / 2 + 95, 20, LIGHTGRAY);
+                 (GetScreenWidth() - MeasureText(menuMsg, 20)) / 2,
+                 GetScreenHeight() / 2 + 95, 20, LIGHTGRAY);
 
     EndDrawing();
 }
