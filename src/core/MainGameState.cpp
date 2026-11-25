@@ -106,9 +106,9 @@ void MainGameState::update(float deltaTime)
     {
         // Abandona el equipo del jugador actual: gana el rival.
         const Player::Team currentTeam = players[currentPlayerIndex].GetTeam();
-        Player::Team winner = Player::Team::Left;
+        GameOverState::Result winner =  GameOverState::Result::LeftWins;
         if (currentTeam == Player::Team::Left)
-            winner = Player::Team::Right;
+            winner = GameOverState::Result::RightWins;
 
         state_machine->add_state(std::make_unique<GameOverState>(winner), true);
         return;
@@ -229,10 +229,10 @@ void MainGameState::ResolveImpact(Vector2 impactPosition)
         if (damage > 0) player.ApplyDamage(static_cast<float>(damage));
     }
 
-    CheckGameOver(leftHpBefore, rightHpBefore);
+    CheckGameOver();
 }
 
-void MainGameState::CheckGameOver(float leftHpBefore, float rightHpBefore)
+void MainGameState::CheckGameOver()
 {
     bool leftAlive = false;
     bool rightAlive = false;
@@ -256,29 +256,17 @@ void MainGameState::CheckGameOver(float leftHpBefore, float rightHpBefore)
         return;
     }
 
-    // Doble KO: gana el equipo que mas vida tenia antes de la explosion.
-    Player::Team winner = Player::Team::Left;
+    // Doble KO: empate 
     if (!leftAlive && !rightAlive)
     {
-        if(rightHpBefore > leftHpBefore)
-        {
-            winner = Player::Team::Right;
-        }
-        else
-        {
-            winner = Player::Team::Left;
-        }
+       state_machine->add_state(std::make_unique<GameOverState>(GameOverState::Result::Draw), true);
+       return;
     }
-    else
+
+    GameOverState::Result winner = GameOverState::Result::RightWins;
+    if (leftAlive)
     {
-        if(leftAlive)
-        {
-            winner = Player::Team::Left;
-        }
-        else
-        {
-            winner = Player::Team::Right;
-        }
+        winner = GameOverState::Result::LeftWins;
     }
 
     state_machine->add_state(std::make_unique<GameOverState>(winner), true);

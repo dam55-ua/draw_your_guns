@@ -5,7 +5,15 @@
 class GameOverState : public GameState
 {
     public:
-        explicit GameOverState(Player::Team winnerTeam);
+
+        enum class Result
+        {
+            LeftWins,
+            RightWins,
+            Draw
+        };
+
+        explicit GameOverState(Result result);
         ~GameOverState() = default;
 
         void init() override;
@@ -17,6 +25,6 @@ class GameOverState : public GameState
         void resume() override {};
 
     private:
-        Player::Team winnerTeam;
+        Result result;
         float elapsed;
 };
