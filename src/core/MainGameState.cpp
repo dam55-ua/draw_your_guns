@@ -151,8 +151,7 @@ void MainGameState::update(float deltaTime)
             player.GetPosition().y >= static_cast<float>(map.getWaterTopY()))
         {
             player.ApplyDamage(GameConfig::PLAYER_MAX_HP);
-            //CheckGameOver
-            NextTurn();
+            CheckGameOver();
         }
     }
 
