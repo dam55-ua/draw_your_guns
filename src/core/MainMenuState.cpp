@@ -5,15 +5,8 @@
 #include <StateMachine.hpp>
 #include <MenuBackground.hpp>
 #include <raylib.h>
-#include <algorithm>
 #include <memory>
 #include <vector>
-
-namespace
-{
-    const Color INK         = {  46,  19,   5, 255 };
-    const Color MENU_ORANGE = { 245, 161,  28, 255 };
-}
 
 MainMenuState::MainMenuState()
     : buttons{

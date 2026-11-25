@@ -21,6 +21,9 @@ class MainGameState : public GameState
 
         void unloadResources();
 
+        void RequestAbandon();
+        void RequestRestart();
+
         void pause() override {};
         void resume() override {};
 
@@ -43,4 +46,8 @@ class MainGameState : public GameState
         Map map;  
 
         char entered_key;
+
+        bool abandonRequested = false;
+        bool restartRequested = false;
+
 };
