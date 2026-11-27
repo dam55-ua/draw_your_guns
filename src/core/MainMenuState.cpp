@@ -4,6 +4,7 @@
 #include <MainGameState.hpp>
 #include <StateMachine.hpp>
 #include <MenuBackground.hpp>
+#include <ResourceManager.hpp>
 #include <raylib.h>
 #include <memory>
 #include <vector>
@@ -18,11 +19,6 @@ MainMenuState::MainMenuState()
 {
 }
 
-MainMenuState::~MainMenuState()
-{
-    UnloadResources();
-}
-
 void MainMenuState::init()
 {
     LoadResources();
@@ -34,21 +30,24 @@ void MainMenuState::init()
 
 void MainMenuState::LoadResources()
 {
-    font = LoadFontEx("assets/fonts/LilitaOne-Regular.ttf", 128, nullptr, 0);
+    font = ResourceManager::Get().GetFont(
+        "assets/fonts/LilitaOne-Regular.ttf", 128);
 
-    // Si el archivo no existe, raylib devuelve una fuente vacia (id 0).
-    if (font.texture.id == 0) font = GetFontDefault();
-    else SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+    const Font defaultFont = GetFontDefault();
 
-    logo = LoadTexture("assets/sprites/ui/menu.png");
-    if (logo.id > 0) SetTextureFilter(logo, TEXTURE_FILTER_BILINEAR);
-}
+    if (font.texture.id != 0 &&
+        font.texture.id != defaultFont.texture.id)
+    {
+        SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+    }
 
-void MainMenuState::UnloadResources()
-{
-    if (logo.id > 0) UnloadTexture(logo);
+    logo = ResourceManager::Get().GetTexture(
+        "assets/sprites/ui/menu.png");
 
-    if (font.texture.id != GetFontDefault().texture.id) UnloadFont(font);
+    if (logo.id > 0)
+    {
+        SetTextureFilter(logo, TEXTURE_FILTER_BILINEAR);
+    }
 }
 
 void MainMenuState::handleInput()
