@@ -49,10 +49,6 @@ Font ResourceManager::GetFont(const std::string& path, int size)
                  path.c_str());
         font = GetFontDefault();
     }
-    else
-    {
-        SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
-    }
 
     fonts[key] = font;
     return font;
@@ -82,5 +78,3 @@ void ResourceManager::UnloadAll()
     }
     fonts.clear();
 }
-
-ResourceManager::~ResourceManager() = default;

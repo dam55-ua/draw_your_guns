@@ -8,7 +8,7 @@ class MainMenuState : public GameState
 {
     public:
         MainMenuState();
-        ~MainMenuState() override;
+        ~MainMenuState() = default;
 
         void init() override;
         void handleInput() override;
@@ -20,7 +20,6 @@ class MainMenuState : public GameState
 
     private:
         void LoadResources();
-        void UnloadResources();
         void DrawLogo() const;
 
         Texture2D logo = {};
