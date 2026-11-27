@@ -1,5 +1,6 @@
 #include <StateMachine.hpp>
 #include <MainMenuState.hpp>
+#include <ResourceManager.hpp>
 #include <memory>
 
 extern "C" {
@@ -36,6 +37,7 @@ int main()
 
     } // StateMachine y sus estados se destruyen aquí.
 
+    ResourceManager::Get().UnloadAll();
     CloseWindow();
 
     return 0;
